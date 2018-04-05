@@ -11,6 +11,7 @@ License: MIT
 
 /* create cookie on page load */
 if(!defined( 'ABSPATH' )) die( 'Error' );
+
 register_activation_hook( __FILE__, 'cp_stat_install' );
 function cp_stat_install(){
     global $wpdb;
