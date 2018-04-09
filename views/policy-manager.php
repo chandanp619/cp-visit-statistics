@@ -50,9 +50,14 @@ class PolicyManagerTable extends WP_List_Table{
           return $columns;
     }
     function extra_tablenav( $which ) {
+        global $wpdb;
+        $sql_pages = "SELECT ID,post_title FROM ".$wpdb->prefix."posts WHERE post_type in ('post','page') AND post_status='publish'";
+        $posts = $wpdb->get_results($sql_pages);
+        $sql_popups = "SELECT * FROM ".$wpdb->prefix."pps_popup WHERE id >= 100";
+        $pops = $wpdb->get_results($sql_popups);
+        
       if ( $which == "top" ){
-        echo '<h1 class="wp-heading-inline">Policy Manager</h1>
-    <a class="page-title-action" href="#">Add Policy</a><div style="width:100%; float:left;margin:10px;"></div>';
+
       }
     }
     function column_popup($item){
@@ -178,6 +183,13 @@ $sql_2 = "SELECT * FROM ".$table_policy." WHERE 1";
  return $wpdb->get_results($sql_2);
     }
     
+function get_bulk_actions() {
+  $actions = array(
+    'delete'    => 'Delete'
+  );
+  return $actions;
+}    
+
 }
 
 
@@ -196,8 +208,9 @@ $sql_2 = "SELECT * FROM ".$table_policy." WHERE 1";
     .add_form input[type='button']{ width:50%;}
 </style>
 <div class="wrap">
-    <!--
-    <div class="add_form" style="display:none;">
+<h1 class="wp-heading-inline">Policy Manager</h1>
+        <a class="pm page-title-action" href="#">Add Policy</a><div style="width:100%; float:left;margin:10px;"></div>
+              <div class="add_form alignright" style="display:none; width:95%;">
         <div class="col">
                 <select name="popups" id="xviewAfter_popup_id">
                 <option value="">Select Popup</option>
@@ -228,7 +241,6 @@ $sql_2 = "SELECT * FROM ".$table_policy." WHERE 1";
             <input type="button" id="addNewRule" value="Add"/>
         </div>
     </div>
-    -->
     <?php 
             $RS = new PolicyManagerTable();
             $RS->prepare_items();
@@ -315,7 +327,7 @@ function xviewActionDelete(rowID,popup,page){
     }
 }
     jQuery(function(){
-       jQuery('#add_policy').on('click',function(e){
+       jQuery('.pm.page-title-action').on('click',function(e){
            e.preventDefault();
            jQuery('.add_form').toggle();
        });

@@ -34,10 +34,7 @@ class RenderStatistics extends WP_List_Table{
     
     function extra_tablenav( $which ) {
       if ( $which == "top" ){
-        echo '<h1 class="wp-heading-inline">Dashboard</h1>
- <a href="http://localhost/testwp/wp-admin/post-new.php?post_type=page" class="page-title-action">Add New</a>';
-          //echo '<div style="clear:both; margin:10px; height:100px;float:left;">Hello</div>';
-          echo '<div style="border:1px solid #999; background-color:#eee;min-height:100px;padding:5px; float:left; width:95%; margin:10px;">Area for Description (Will be updated later).</div>';
+        
      }
     }
     function column_uuid($item){
@@ -135,7 +132,6 @@ public function process_bulk_action() {
         //         wp_die( 'Nope! Security check failed!' );
 
         // }
-        
         $action = $this->current_action();
         
         global $wpdb;
@@ -149,8 +145,6 @@ public function process_bulk_action() {
                     $sql_del = "DELETE from ".$table_csi_data." WHERE id='".$id."'";
                     $wpdb->query($sql_del);
                 }
-               
-                
                 break;
 
             default:
@@ -168,7 +162,11 @@ public function process_bulk_action() {
 
 ?>
 <div class="wrap">
-    
+   <?php  echo '<h1 class="wp-heading-inline">Dashboard</h1>';
+        //echo '<a href="http://localhost/testwp/wp-admin/post-new.php?post_type=page" class="page-title-action">Add New</a>';
+          //echo '<div style="clear:both; margin:10px; height:100px;float:left;">Hello</div>';
+          echo '<div style="border:1px solid #999; background-color:#eee;min-height:100px;padding:5px; float:left; width:95%; margin:10px;">Area for Description (Will be updated later).</div>';
+    ?>
     <br/>
     <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>?page=cp-visit-statistics">
     <?php 

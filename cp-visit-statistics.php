@@ -34,8 +34,19 @@ function cp_stat_install(){
 
 add_action('init','generate_stat');
 function generate_stat(){
+    
+    if(!session_id()) {
+        session_start();
+    }
+    
+    if(!wp_doing_ajax()){   
+    
+        
         
     require_once(__DIR__.'/UUID.php');
+        if(!$_SESSION['sessid'])
+            $_SESSION['sessid'] = UUID::v4();
+        
         $cookieData = isset($_COOKIE['cpvs']) ? $_COOKIE['cpvs'] :'';
         
         if($cookieData!=''){
@@ -84,17 +95,13 @@ function generate_stat(){
         //$cookieValueArr['numVisit'] = 1;
         //$cookieValueArr['date'] = date('Y-m-d H:i:s');
        
-        
-        
-        if(is_home() || is_front_page()){
-            $postID = get_option( 'page_on_front' );
-            
-        }elseif(isset( $wp_query ) && (bool) $wp_query->is_posts_page){
-            $postID = get_option( 'page_for_posts' );
-        }else{
-          $postID = $post->ID;  
+       $postID =  url_to_postid( "http://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI'] );
+       if($postID == 0){
+                $postID = get_option( 'page_for_posts' );    
         }
-        $cookieValueArr['pageID'] = get_edit_post_link( $postID );
+    
+        //var_dump($postID);
+        $cookieValueArr['pageID'] = $postID ;
     
             
         $ipid = $wpdb->get_col("SELECT id FROM ".$table_csi." WHERE ip='".$clientIP."'"); 
@@ -112,14 +119,25 @@ function generate_stat(){
         $sql_select = "SELECT * FROM ".$table_csi." WHERE id='".$ipid[0]."'";
         $data = $wpdb->get_row($sql_select,ARRAY_A);
         
-        $sql_1 = "UPDATE ".$table_csi." SET num_visit='".($data['num_visit']+1)."' WHERE ip='".$clientIP."'";
-            $wpdb->query($sql_1); 
+        $_SESSION['num_visit'] = $data['num_visit'];
+        $_SESSION['client_IP'] = $clientIP;    
             
          //$sql_2 = "UPDATE ".$table_csi_data." SET ip_id='".$ipid[0]."', post_id='".$postID."',uuid='".$_SESSION['cpvs_id']."', visit_time='".$_SESSION['first_visit']."',meta='".json_encode($cookieValueArr)."'";
-            //$wpdb->query($sql_2);   
+            //$wpdb->query($sql_2);  
+            
+         if($_SESSION['num_visit_updated']==NULL){
+            global $wpdb;
+            $table_csi = $wpdb->prefix . 'cp_statistics_ip';
+            $sql_1 = "UPDATE ".$table_csi." SET num_visit='".($_SESSION['num_visit']+1)."' WHERE ip='".$_SESSION['client_IP']."'";
+            $wpdb->query($sql_1); 
+                $_SESSION['num_visit_updated']= true;
+        }   
+            
+            
         }
-    
+}// ajax check
 }
+
 add_action('wp_enqueue_scripts','add_frontend_assets');
 function add_frontend_assets(){
   wp_enqueue_script('cp-statistics',plugins_url('assets/js/cp-statistics.js', __FILE__),array('jquery'),'2.0.5',true); 
