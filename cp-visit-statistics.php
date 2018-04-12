@@ -104,14 +104,15 @@ function generate_stat(){
         $cookieValueArr['pageID'] = $postID ;
     
             
-        $ipid = $wpdb->get_col("SELECT id FROM ".$table_csi." WHERE ip='".$clientIP."'"); 
+        $ipdata = $wpdb->get_results("SELECT * FROM ".$table_csi." WHERE ip='".$clientIP."'",ARRAY_A); 
+        $ipid = $ipdata[0]['id']; 
     
         if(!$ipid){
             
             $sql_1 = "INSERT INTO ".$table_csi." SET ip='".$clientIP."',email='',num_visit='1'";
             $wpdb->query($sql_1);
             $ipid = $wpdb->insert_id;
-            
+            $cookieValueArr['visit'] = 1;
             $sql_2 = "INSERT INTO ".$table_csi_data." SET ip_id='".$ipid."', post_id='".$postID."', uuid='".$_SESSION['cpvs_id']."', visit_time='".date('Y-m-d H:i:s',$_SESSION['first_visit'])."',meta='".json_encode($cookieValueArr)."'";
             $wpdb->query($sql_2);
         }else{
@@ -121,13 +122,16 @@ function generate_stat(){
         
         $_SESSION['num_visit'] = $data['num_visit'];
         $_SESSION['client_IP'] = $clientIP;    
-            
-         //$sql_2 = "UPDATE ".$table_csi_data." SET ip_id='".$ipid[0]."', post_id='".$postID."',uuid='".$_SESSION['cpvs_id']."', visit_time='".$_SESSION['first_visit']."',meta='".json_encode($cookieValueArr)."'";
-            //$wpdb->query($sql_2);  
+        $cookieValueArr['visit'] = $ipdata[0]['num_visit'];    
+         $sql_2 = "UPDATE ".$table_csi_data." SET ip_id='".$ipid."', post_id='".$postID."',uuid='".$_SESSION['cpvs_id']."', visit_time='".date('Y-m-d H:i:s')."',meta='".json_encode($cookieValueArr)."'";
+        $wpdb->query($sql_2);  
             
          if($_SESSION['num_visit_updated']==NULL){
             global $wpdb;
             $table_csi = $wpdb->prefix . 'cp_statistics_ip';
+            
+             
+             
             $sql_1 = "UPDATE ".$table_csi." SET num_visit='".($_SESSION['num_visit']+1)."' WHERE ip='".$_SESSION['client_IP']."'";
             $wpdb->query($sql_1); 
                 $_SESSION['num_visit_updated']= true;
